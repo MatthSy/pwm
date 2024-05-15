@@ -3,7 +3,7 @@ use std::str::from_utf8;
 use crate::my_hasher::hash;
 
 pub(crate) fn get_mdp_input() -> String {
-    println!("Entre le mdp grand fou");
+    println!("Enter password : ");
     let mut buffer = String::new();
     let stdin = stdin();
     stdin.read_line(&mut buffer).unwrap();

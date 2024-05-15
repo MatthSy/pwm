@@ -1,10 +1,12 @@
 #[allow(unused)]
 use std::fmt::{Display, Octal};
+use std::fs;
 use serde;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::{File};
 use std::io::{Read, Write};
+use std::path::Path;
 use crate::encryption::{decrypt_mdp, encrypt_mdp};
 
 
@@ -16,7 +18,16 @@ pub(crate) struct EncryptedData {
 }
 
 pub(crate) fn mem_put(input_password:String, site: String) {
-    let mut file = File::open("./data/data.json").expect("File opening error");
+    let mut data_file = dirs::document_dir().expect("Cannot go to Documents directory");
+
+    if fs::DirBuilder::new().create("./pwm").is_ok() {
+        println!("Directory created");
+    }
+
+    data_file.push(Path::new("pwm/data.json"));
+
+    let mut file = File::options().create(true).append(true).read(true).open(data_file.clone()).expect("Error creating data.json");
+
     let mut buffer = String::new();
     file.read_to_string(&mut buffer).unwrap();
 
@@ -27,12 +38,15 @@ pub(crate) fn mem_put(input_password:String, site: String) {
 
     let serialized_data = serde_json::to_string_pretty(&data_vec).unwrap();
 
-    let mut file = File::create("./data/data.json").expect("File opening error");
+    let mut file = File::create(data_file).expect("File opening error");
     file.write_all(serialized_data.as_ref()).unwrap();
 }
 
 pub(crate) fn mem_get(site: Option<String>) {
-    let mut file = File::open("./data/data.json").expect("File opening error");
+    let mut data_file = dirs::document_dir().expect("Cannot go to Documents directory");
+    data_file.push(Path::new("pwm/data.json"));
+
+    let mut file = File::open(data_file).expect("File opening error");
     let mut buffer = String::new();
     file.read_to_string(&mut buffer).unwrap();
 
@@ -42,13 +56,18 @@ pub(crate) fn mem_get(site: Option<String>) {
         Some(site) => {
             for i in 0..data.len() {
                 if data[i].site == site {
-                    println!("{}", decrypt_mdp(data[i].clone(), i as u32));
+                    //TODO : add to clipboard
+                    println!("Password : {}\nSaved to clipboard", decrypt_mdp(data[i].clone(), i as u32));
                 }
             }
+            return;
         }
 
         None => {
-            println!("{:?}", data);
+            for i in 0..data.len() {
+                    println!("{i}) {}", data[i].site);
+            }
+            return;
         }
     }
 }

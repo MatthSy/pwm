@@ -2,9 +2,12 @@ mod access;
 mod my_hasher;
 mod encryption;
 mod memoire;
+mod no_cmd_app;
 
+use std::env;
 use clap::{Parser, Subcommand};
 use crate::memoire::{mem_get, mem_put};
+use crate::no_cmd_app::no_cmd_app;
 
 
 #[derive(Parser)]
@@ -60,7 +63,7 @@ fn main() {
             }
         }
         None => {
-            println!("No command entered, try help to get more info");
+            no_cmd_app();
         }
     }
 }

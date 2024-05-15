@@ -15,7 +15,7 @@ impl NonceSequence for CounterNonceSequence {
 
         let bytes = self.0.to_be_bytes();
         nonce_bytes[8..].copy_from_slice(&bytes);
-        println!("nonce_bytes = {}", hex::encode(&nonce_bytes));
+        // println!("nonce_bytes = {}", hex::encode(&nonce_bytes));
 
         self.0 += 1; // advance the counter
         Nonce::try_assume_unique_for_key(&nonce_bytes)
@@ -31,7 +31,7 @@ pub(crate) fn encrypt_mdp(input :String, site: String, counter: u32) -> Encrypte
     for i in 0..AES_256_GCM.key_len() {
         key_bytes[i] = hashed[i];
     }
-    println!("{:?}", &key_bytes);
+    // println!("{:?}", &key_bytes);
 
     let unbound_key = UnboundKey::new(&AES_256_GCM, &key_bytes).expect("Unbound key creation fail");
     let nonce_sequence = CounterNonceSequence(counter);
@@ -54,7 +54,7 @@ pub(crate) fn decrypt_mdp(input: EncryptedData, counter: u32) -> String{
     for i in 0..AES_256_GCM.key_len() {
         key_bytes[i] = hashed[i];
     }
-    println!("{:?}", &key_bytes);
+    // println!("{:?}", &key_bytes);
 
     let unbound_key = UnboundKey::new(&AES_256_GCM, &key_bytes).expect("Error creating unbound_key");
     let nonce_sequence = CounterNonceSequence(counter);
@@ -65,6 +65,6 @@ pub(crate) fn decrypt_mdp(input: EncryptedData, counter: u32) -> String{
     let associated_data = Aad::from(input.site.clone());
     let decrypted_data = opening_key.open_in_place(associated_data, &mut cypher_text_with_tag).expect("Error, incorrect password or unknown internal error");
 
-    println!("decrypted_data = {}", String::from_utf8(decrypted_data.to_vec()).unwrap());
+    // println!("decrypted_data = {}", String::from_utf8(decrypted_data.to_vec()).unwrap());
     String::from_utf8(decrypted_data.to_vec()).unwrap()
 }
