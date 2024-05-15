@@ -33,7 +33,7 @@ pub(crate) fn encrypt_mdp(input :String, site: String, counter: u32) -> Encrypte
     }
     println!("{:?}", &key_bytes);
 
-    let unbound_key = UnboundKey::new(&AES_256_GCM, &key_bytes).expect("Erreur creation unbound_key tests.rs");
+    let unbound_key = UnboundKey::new(&AES_256_GCM, &key_bytes).expect("Unbound key creation fail");
     let nonce_sequence = CounterNonceSequence(counter);
     let mut sealing_key = SealingKey::new(unbound_key, nonce_sequence);
 
@@ -41,7 +41,7 @@ pub(crate) fn encrypt_mdp(input :String, site: String, counter: u32) -> Encrypte
     let mut in_out = input.clone().to_mdp();
 
     // Encrypt the data with AEAD using the AES_256_GCM algorithm
-    let tag = sealing_key.seal_in_place_separate_tag(associated_data, &mut in_out).expect("Erreur encryptage.rs");
+    let tag = sealing_key.seal_in_place_separate_tag(associated_data, &mut in_out).expect("Encrypting error");
     EncryptedData { mdp: in_out, site, tag: <[u8; 16]>::try_from(tag.as_ref()).unwrap() }
 }
 
@@ -56,14 +56,14 @@ pub(crate) fn decrypt_mdp(input: EncryptedData, counter: u32) -> String{
     }
     println!("{:?}", &key_bytes);
 
-    let unbound_key = UnboundKey::new(&AES_256_GCM, &key_bytes).expect("Erreur creation unbound_key tests.rs");
+    let unbound_key = UnboundKey::new(&AES_256_GCM, &key_bytes).expect("Error creating unbound_key");
     let nonce_sequence = CounterNonceSequence(counter);
     let mut opening_key = OpeningKey::new(unbound_key, nonce_sequence);
 
     let mut cypher_text_with_tag = [&input.mdp, input.tag.as_ref()].concat();
 
     let associated_data = Aad::from(input.site.clone());
-    let decrypted_data = opening_key.open_in_place(associated_data, &mut cypher_text_with_tag).expect("Erreur ligne 38 tests.rs");
+    let decrypted_data = opening_key.open_in_place(associated_data, &mut cypher_text_with_tag).expect("Error, incorrect password or unknown internal error");
 
     println!("decrypted_data = {}", String::from_utf8(decrypted_data.to_vec()).unwrap());
     String::from_utf8(decrypted_data.to_vec()).unwrap()

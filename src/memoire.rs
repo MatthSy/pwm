@@ -15,29 +15,28 @@ pub(crate) struct EncryptedData {
     pub(crate) tag: [u8; 16],
 }
 
-pub(crate) fn mem_put(input :String, site: String) {
-    let mut file = File::open("./data/mdp.json").expect("Erreur d'ouverture de fichier in fn mep_put");
+pub(crate) fn mem_put(input_password:String, site: String) {
+    let mut file = File::open("./data/data.json").expect("File opening error");
     let mut buffer = String::new();
     file.read_to_string(&mut buffer).unwrap();
 
     let mut data_vec: Vec<EncryptedData> = serde_json::from_str(&buffer).unwrap_or(vec![]);
 
-    let input_encrypted = encrypt_mdp(input, site, data_vec.len() as u32);
+    let input_encrypted = encrypt_mdp(input_password, site, data_vec.len() as u32);
     data_vec.push(input_encrypted);
 
     let serialized_data = serde_json::to_string_pretty(&data_vec).unwrap();
 
-    let mut file = File::create("./data/mdp.json").expect("Erreur d'ouverture de fichier in fn mep_put");
+    let mut file = File::create("./data/data.json").expect("File opening error");
     file.write_all(serialized_data.as_ref()).unwrap();
 }
 
 pub(crate) fn mem_get(site: Option<String>) {
-    let mut file = File::open("./data/mdp.json").expect("Erreur d'ouverture de fichier in fn mep_put");
+    let mut file = File::open("./data/data.json").expect("File opening error");
     let mut buffer = String::new();
     file.read_to_string(&mut buffer).unwrap();
 
     let data: Vec<EncryptedData> = serde_json::from_str(&buffer).unwrap();
-
 
     match site {
         Some(site) => {
@@ -52,8 +51,6 @@ pub(crate) fn mem_get(site: Option<String>) {
             println!("{:?}", data);
         }
     }
-
-
 }
 
 pub(crate) trait ToMdp {
