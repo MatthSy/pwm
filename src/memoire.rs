@@ -8,7 +8,7 @@ use std::fs::{File};
 use std::io::{Read, Write};
 use std::path::Path;
 use crate::encryption::{decrypt_mdp, encrypt_mdp};
-
+use arboard::Clipboard;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub(crate) struct EncryptedData {
@@ -56,10 +56,15 @@ pub(crate) fn mem_get(site: Option<String>) {
         Some(site) => {
             for i in 0..data.len() {
                 if data[i].site == site {
-                    //TODO : add to clipboard
-                    println!("Password : {}\nSaved to clipboard", decrypt_mdp(data[i].clone(), i as u32));
+                    let password = decrypt_mdp(data[i].clone(), i as u32);
+                    println!("Password : {}\nSaved to clipboard", password.clone());
+
+                    let mut clipboard = Clipboard::new().unwrap();
+                    clipboard.set_text(password).unwrap();
+                    return;
                 }
             }
+            println!("\n - Site is not registered - ");
             return;
         }
 

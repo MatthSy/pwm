@@ -4,7 +4,6 @@ mod encryption;
 mod memoire;
 mod no_cmd_app;
 
-use std::env;
 use clap::{Parser, Subcommand};
 use crate::memoire::{mem_get, mem_put};
 use crate::no_cmd_app::no_cmd_app;
