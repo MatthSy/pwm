@@ -1,7 +1,7 @@
 use ring::aead::{Aad, AES_256_GCM, BoundKey, Nonce, NONCE_LEN, NonceSequence, OpeningKey, SealingKey, UnboundKey};
 use ring::error::Unspecified;
 use crate::access::get_hashed_password;
-use crate::memoire::{EncryptedData, ToMdp};
+use crate::memory::{EncryptedData, ToMdp};
 use crate::my_hasher::hash;
 
 #[allow(unused)]

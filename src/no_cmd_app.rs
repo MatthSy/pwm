@@ -1,6 +1,6 @@
 use std::io::{stdin, stdout, Write};
 #[allow(unused)]
-use crate::memoire::{mem_get, mem_put};
+use crate::memory::{mem_get, mem_put};
 
 pub(crate) fn no_cmd_app() {
     let mut stdout = stdout();
