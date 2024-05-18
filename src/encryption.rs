@@ -1,6 +1,6 @@
 use ring::aead::{Aad, AES_256_GCM, BoundKey, Nonce, NONCE_LEN, NonceSequence, OpeningKey, SealingKey, UnboundKey};
 use ring::error::Unspecified;
-use crate::access::get_mdp_input;
+use crate::access::get_hashed_password;
 use crate::memoire::{EncryptedData, ToMdp};
 use crate::my_hasher::hash;
 
@@ -24,7 +24,7 @@ impl NonceSequence for CounterNonceSequence {
 
 
 pub(crate) fn encrypt_mdp(input :String, site: String, counter: u32) -> EncryptedData {
-    let mdp_key = get_mdp_input();
+    let mdp_key = get_hashed_password();
 
     let mut key_bytes = vec![0; AES_256_GCM.key_len()];
     let hashed = hash(&mdp_key);
@@ -47,7 +47,7 @@ pub(crate) fn encrypt_mdp(input :String, site: String, counter: u32) -> Encrypte
 
 #[allow(unused)]
 pub(crate) fn decrypt_mdp(input: EncryptedData, counter: u32) -> String{
-    let mdp_key = get_mdp_input();
+    let mdp_key = get_hashed_password();
 
     let mut key_bytes = vec![0; AES_256_GCM.key_len()];
     let hashed = hash(&mdp_key);

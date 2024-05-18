@@ -1,4 +1,5 @@
 use std::io::{stdin, stdout, Write};
+#[allow(unused)]
 use crate::memoire::{mem_get, mem_put};
 
 pub(crate) fn no_cmd_app() {
@@ -6,9 +7,8 @@ pub(crate) fn no_cmd_app() {
     println!("\n\n------------------PassWord Manager------------------\n");
     println!("\tWelcome to pwm, type a command to execute :");
     println!("\t  - put : save a password in memory");
-    println!("\t  - get : get a password from memory");
+    println!("\t  - get : get a password from memory\n");
 
-    // stdout.execute(terminal::Clear(ClearType::FromCursorDown)).unwrap();
 
     let mut buffer = String::new();
     let stdin = stdin();
@@ -24,9 +24,13 @@ pub(crate) fn no_cmd_app() {
             mem_get(Some(buffer.trim().parse().unwrap()));
         }
         "put" => {
-            // mem_put();
+            println!("Enter the site name you want to save password for :\n   ");
+            let mut buffer = String::new();
+            stdin.read_line(&mut buffer).unwrap();
+
+            mem_put(String::from(buffer.trim()));
         }
-        "exit" | "quit" | "cancel" | "clear" => return,
-        _ => println!("Naaaah"),
+        "exit" | "quit" | "cancel" | "clear" | "" => println!("\nEnd of task"),
+        _ => println!("Unknown command"),
     }
 }

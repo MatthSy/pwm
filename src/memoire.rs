@@ -9,6 +9,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use crate::encryption::{decrypt_mdp, encrypt_mdp};
 use arboard::Clipboard;
+use crate::access::get_password;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub(crate) struct EncryptedData {
@@ -17,29 +18,35 @@ pub(crate) struct EncryptedData {
     pub(crate) tag: [u8; 16],
 }
 
-pub(crate) fn mem_put(input_password:String, site: String) {
+pub(crate) fn mem_put(site: String) {
+    let site = site.to_lowercase();
+
+    // Getting file directory :
     let mut data_file = dirs::document_dir().expect("Cannot go to Documents directory");
-
-    if fs::DirBuilder::new().create("./pwm").is_ok() {
-        println!("Directory created");
-    }
-
+    if fs::DirBuilder::new().create("./pwm").is_ok() { println!("Directory created"); }
     data_file.push(Path::new("pwm/data.json"));
 
-    let mut file = File::options().create(true).append(true).read(true).open(data_file.clone()).expect("Error creating data.json");
+    // Get password to save :
+    let password_to_save = get_password();
 
+    // Putting file to buffer
+    let mut file = File::options().create(true).append(true).read(true).open(data_file.clone()).expect("Error creating data.json");
     let mut buffer = String::new();
     file.read_to_string(&mut buffer).unwrap();
 
+    // Parse buffered data to Vec<EncryptedData>
     let mut data_vec: Vec<EncryptedData> = serde_json::from_str(&buffer).unwrap_or(vec![]);
 
-    let input_encrypted = encrypt_mdp(input_password, site, data_vec.len() as u32);
+    // Encrypt password and push it into data_vec
+    let input_encrypted = encrypt_mdp(password_to_save, site, data_vec.len() as u32);
     data_vec.push(input_encrypted);
 
+    // Re-serialize data_vec, recreate a blank file on top of the old one, re-write data in it
     let serialized_data = serde_json::to_string_pretty(&data_vec).unwrap();
-
     let mut file = File::create(data_file).expect("File opening error");
     file.write_all(serialized_data.as_ref()).unwrap();
+
+    println!("Password encrypted and saved");
 }
 
 pub(crate) fn mem_get(site: Option<String>) {
@@ -55,7 +62,7 @@ pub(crate) fn mem_get(site: Option<String>) {
     match site {
         Some(site) => {
             for i in 0..data.len() {
-                if data[i].site == site {
+                if data[i].site == site.to_lowercase() {
                     let password = decrypt_mdp(data[i].clone(), i as u32);
                     println!("Password : {}\nSaved to clipboard", password.clone());
 
@@ -69,9 +76,11 @@ pub(crate) fn mem_get(site: Option<String>) {
         }
 
         None => {
+            println!();
             for i in 0..data.len() {
-                    println!("{i}) {}", data[i].site);
+                println!(" - {}", data[i].site);
             }
+            println!();
             return;
         }
     }

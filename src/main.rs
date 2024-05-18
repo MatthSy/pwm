@@ -20,11 +20,19 @@ struct Cli {
 enum Commands {
     Memput {
         #[arg(short, long)]
-        password: Option<String>,
+        site: Option<String>,
+    },
+    Put {
         #[arg(short, long)]
         site: Option<String>,
     },
     Memget {
+        #[arg(short, long)]
+        site: Option<String>,
+        #[arg(short, long)]
+        all: bool,
+    },
+    Get {
         #[arg(short, long)]
         site: Option<String>,
         #[arg(short, long)]
@@ -36,24 +44,17 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::Memput { password: mdp, site }) => {
-            let mut val_mdp = String::new();
+        Some(Commands::Memput {site } | Commands::Put {site }) => {
             let mut val_site = String::new();
-            match mdp {
-                None => {}
-                Some(data) => {
-                    val_mdp = data.to_string();
-                }
-            }
             match site {
                 None => {}
                 Some(data) => {
                     val_site = data.to_string();
                 }
             }
-            mem_put(val_mdp, val_site);
+            mem_put(val_site);
         }
-        Some(Commands::Memget { site, all }) => {
+        Some(Commands::Memget { site, all } | Commands::Get { site, all }) => {
             match site {
                 Some(val) => mem_get(Some(val.to_string())),
                 None => {
